@@ -56,7 +56,7 @@ module.exports = {
   },
   configurations: {
     'ios.sim.debug': {
-      device: 'simulator',
+      device: 'iPhone 15',
       app: 'ios.debug'
     },
     'ios.sim.release': {
