@@ -50,7 +50,7 @@ module.exports = {
     emulator: {
       type: 'android.emulator',
       device: {
-        avdName: 'Medium_Phone_API_36.0'
+        avdName: 'Android_API31'
       }
     }
   },
