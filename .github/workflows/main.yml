@@ -4,7 +4,7 @@ on: [pull_request]
 jobs:
     build-and-test-ios:
         name: iOS - Build and run Detox tests
-        runs-on: macos-13-xlarge
+        runs-on: macos-13-large
 
         steps:
             - name: Checkout Code
