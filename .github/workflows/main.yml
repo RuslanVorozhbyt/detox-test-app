@@ -33,6 +33,9 @@ jobs:
               run: |
                   brew tap wix/brew
                   brew install applesimutils
+
+            - name: Check Available Emulators
+              run: applesimutils --list
             - name: Run Detox tests
               run: npm run detox:ios:test:ci
 
