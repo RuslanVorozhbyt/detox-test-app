@@ -1,9 +1,5 @@
 /** @type {Detox.DetoxConfig} */
 module.exports = {
-  session: {
-    server: 'ws://127.0.0.1:8099',
-    executor: 'ws://127.0.0.1:8099',
-  },
   testRunner: {
     args: {
       '$0': 'jest',
