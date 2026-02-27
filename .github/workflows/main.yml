@@ -87,20 +87,27 @@ jobs:
 
       - name: Start Metro Server
         env:
+          # This prevents the "Interactive mode" hang and the DevTools crash
           REACT_TERMINAL_RUN_INTERACTIVE: false
           ELECTRON_DISABLE_SANDBOX: 1
-        run: npm run detox:start &
+        run: |
+          # Start Metro in the background
+          npm run detox:start &
+          # Wait until the port is actually responding before moving to tests
+          npx wait-on http://127.0.0.1:8081 --timeout 60000
 
       - name: Run Detox tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 36
+          api-level: 34
           arch: x86_64
-          avd-name: Android_API31
+          avd-name: Android_API34
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
-          disable-animations: false
-          script: npm run detox:android:test:ci
+          disable-animations: true
+          script: |
+            sleep 15
+            npm run detox:android:test:ci
 
       - name: Upload Test Artifact
         if: failure()
