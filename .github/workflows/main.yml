@@ -2,108 +2,104 @@ name: Run Detox Tests
 on: [pull_request]
 
 jobs:
-    build-and-test-ios:
-        name: iOS - Build and run Detox tests
-        runs-on: macos-13-xlarge
+  build-and-test-ios:
+    name: iOS - Build and run Detox tests
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.2.0
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 22.2.0
+      - name: Npm install
+        run: npm install
 
-            - name: Npm install
-              run: npm install
+      - name: Pod install
+        run: cd ios && pod install
 
-            - name: Pod install
-              run: cd ios && pod install
+      - name: Build Detox
+        run: npm run detox:ios:build
 
-            - name: Build Detox
-              run: npm run detox:ios:build
+      - name: Start Metro Server
+        run: npm run detox:start &
 
-            - name: Start Metro Server
-              run: npm run detox:start &
+      - name: Install Applesimutils
+        run: |
+          brew tap wix/brew
+          brew install applesimutils
 
-            - name: Install Applesimutils
-              run: |
-                  brew tap wix/brew
-                  brew install applesimutils
-            - name: Run Detox tests
-              run: npm run detox:ios:test:ci
+      - name: Run Detox tests
+        run: npm run detox:ios:test:ci
 
-            - name: Upload Test Artifact
-              if: failure()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: detox-ios-artifacts
-                  path: artifacts
-                  retention-days: 5
+      - name: Upload Test Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detox-ios-artifacts
+          path: artifacts
+          retention-days: 5
 
-    build-and-test-android:
-        name: Android - Build and run Detox tests
-        runs-on: ubuntu-latest
-        steps:
-            - name: Free Disk Space (Ubuntu)
-              uses: jlumbroso/free-disk-space@main
-              with:
-                  tool-cache: true
-                  android: false
+  build-and-test-android:
+    name: Android - Build and run Detox tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: false
 
-            - name: Checkout Code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 1
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 22.2.0
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-            - name: Setup Java
-              uses: actions/setup-java@v4
-              with:
-                  distribution: zulu
-                  java-version: 17
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.2.0
 
-            - name: Npm install
-              run: npm install
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
 
-            - name: Build Detox
-              run: npm run detox:android:build
+      - name: Npm install
+        run: npm install
 
-            - name: Run Detox tests
-              uses: reactivecircus/android-emulator-runner@v2
-              with:
-                  api-level: 31
-                  arch: x86_64
-                  avd-name: Android_API31
-                  force-avd-creation: false
-                  emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
-                  disable-animations: true
-                  script: |
-                    # 1. Start Metro in the background and pipe logs to a file
-                    # We use REACT_TERMINAL_RUN_INTERACTIVE=false to prevent the DevTools crash
-                    export REACT_TERMINAL_RUN_INTERACTIVE=false
-                    npm run detox:start > metro.log 2>&1 &
-                    
-                    # 2. Wait for Metro port (8081) to be active
-                    echo "Waiting for Metro to start..."
-                    npx wait-on http://127.0.0.1:8081 --timeout 120000
-                    
-                    # 3. Run the tests
-                    npm run detox:android:test:ci
+      - name: Build Detox
+        run: npm run detox:android:build
 
-            - name: Upload Test Artifact
-              if: failure()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: detox-android-artifacts
-                  path: |
-                    artifacts
-                    metro.log
-                  retention-days: 5
+      - name: Start Metro Server
+        run: npm run detox:start &
+
+      - name: Run Detox tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          arch: x86_64
+          avd-name: Android_API31
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          disable-animations: false
+          script: npm run detox:android:test:ci
+
+      - name: Upload Test Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detox-android-artifacts
+          path: artifacts
+          retention-days: 5
