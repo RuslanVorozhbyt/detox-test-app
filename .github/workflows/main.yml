@@ -86,6 +86,8 @@ jobs:
         run: npm run detox:android:build
 
       - name: Start Metro Server
+        env:
+          REACT_TERMINAL_RUN_INTERACTIVE: false
         run: npm run detox:start &
 
       - name: Run Detox tests
