@@ -88,6 +88,7 @@ jobs:
       - name: Start Metro Server
         env:
           REACT_TERMINAL_RUN_INTERACTIVE: false
+          ELECTRON_DISABLE_SANDBOX: 1
         run: npm run detox:start &
 
       - name: Run Detox tests
