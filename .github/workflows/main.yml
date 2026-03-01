@@ -82,6 +82,9 @@ jobs:
       - name: Build Detox
         run: npm run detox:android:build
 
+      - name: Enable unprivileged user namespaces
+        run: sudo sysctl -w kernel.unprivileged_userns_clone=1
+
       - name: Start Metro Server
         run: npm run detox:start &
 
