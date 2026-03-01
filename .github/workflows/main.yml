@@ -79,6 +79,18 @@ jobs:
       - name: Npm install
         run: npm install
 
+      - name: Fix Chrome Sandbox Permissions
+        run: |
+          # Use find to locate any chrome-sandbox within the dotslash cache
+          SANDBOX_PATH=$(find /home/runner/.cache/dotslash -name "chrome-sandbox" | head -n 1)
+          if [ -n "$SANDBOX_PATH" ]; then
+            echo "Fixing permissions for $SANDBOX_PATH"
+            sudo chown root:root "$SANDBOX_PATH"
+            sudo chmod 4755 "$SANDBOX_PATH"
+          else
+            echo "chrome-sandbox not found, skipping permission fix."
+          fi
+
       - name: Build Detox
         run: npm run detox:android:build
 
