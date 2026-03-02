@@ -99,7 +99,12 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           disable-animations: true
-          script: npm run detox:android:test:ci
+          script: |
+            $ANDROID_HOME/platform-tools/adb reverse tcp:8081 tcp:8081
+            
+            npx wait-on http://localhost:8081/status
+            
+            npm run detox:android:test:ci
 
       - name: Upload Test Artifact
         if: failure()
