@@ -82,7 +82,13 @@ jobs:
         run: npm install
 
       - name: Build Detox
-        run: npx detox build --configuration android.emu.release
+        run: npm run detox:android:build
+
+      - name: Start Metro Server
+        run: npm run detox:start &
+
+      - name: Debug - List APKs
+        run: find android/app/build/outputs/apk -name "*.apk"
 
       - name: Run Detox tests
         uses: reactivecircus/android-emulator-runner@v2
