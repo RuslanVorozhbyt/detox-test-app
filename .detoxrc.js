@@ -31,14 +31,14 @@ module.exports = {
     'android.release': {
       type: 'android.apk',
       binaryPath: 'android/app/build/outputs/apk/release/app-release.apk',
-      build: 'cd android && ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release'
+      build: 'cd android && ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release',
     }
   },
   devices: {
     simulator: {
       type: 'ios.simulator',
       device: {
-        type: 'iPhone 12 Pro'
+        type: 'iPhone 16',
       }
     },
     attached: {
@@ -50,8 +50,8 @@ module.exports = {
     emulator: {
       type: 'android.emulator',
       device: {
-        avdName: 'Medium_Phone_API_36.0'
-      }
+        avdName: 'Android_API31'
+      },
     }
   },
   configurations: {
